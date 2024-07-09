@@ -4,7 +4,7 @@ import os
 import boto3
 from dotenv import load_dotenv
 from flask_cors import CORS
-from utils import classify_message, handle_order_status_include_id_classification, handle_request_human_include_info_classification, create_order, get_order_by_id, fetch_orders, update_order_status, delete_order_by_id
+from utils import classify_message, handle_order_status_include_id_classification, handle_request_human_include_info_classification, create_order_handle, get_order_by_id, fetch_orders, update_order_status, delete_order_by_id
 from constants import (INITIAL, ORDER_STATUS_WITHOUT_ID, ORDER_STATUS_INCLUDE_ID,
                        REQUEST_HUMAN_WITHOUT_ALL_CONTACT_INFO, REQUEST_HUMAN_INCLUDE_ALL_CONTACT_INFO,
                        RETURN_POLICY_Q1, RETURN_POLICY_Q2, RETURN_POLICY_Q3, UNKNOWN,
@@ -67,7 +67,7 @@ def chat():
 @app.route('/order', methods=['POST'])
 def create_order():
     order_status = request.json.get('status')
-    unique_id = create_order(orders_table, order_status)
+    unique_id = create_order_handle(orders_table, order_status)
     return jsonify({'id': unique_id})
 
 @app.route('/order/<order_id>', methods=['GET'])
