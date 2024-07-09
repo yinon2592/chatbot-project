@@ -1,0 +1,15 @@
+.userMessage {
+    background-color: #e0f7fa; 
+    padding: 10px;
+    border-radius: 10px;
+    text-align: right;
+    margin: 5px;
+}
+
+.botMessage {
+    background-color: #bdd1bd; 
+    padding: 10px;
+    border-radius: 10px;
+    text-align: left;
+    margin: 5px;
+}
