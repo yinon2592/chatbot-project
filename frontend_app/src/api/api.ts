@@ -8,8 +8,8 @@ import {
     REQUEST_HUMAN_PATH
 }from '../constants'
 
-const apiDevUrl =  'http://localhost:5000'; 
-const apiProdUrl = 'to-complete';
+const apiDevUrl =  'http://localhost:5000';
+const apiProdUrl =  'http://localhost:5000'; 
 
 const baseUrl = process.env.NODE_ENV === 'production' ? apiProdUrl : apiDevUrl;
 

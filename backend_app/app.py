@@ -17,8 +17,8 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Enable CORS for all domains on all routes
-CORS(app)
+# Allow only the frontend running on localhost:3000 to access the backend
+CORS(app, origins="http://localhost:5173")
 
 # Initialize OpenAI client
 clientOpenAi = OpenAI(
