@@ -39,7 +39,7 @@ Caching is implemented to enhance performance. The use of WebSockets could furth
 
 The design focuses on user convenience and ease of use.
 
-### Setup Instructions
+## Setup Instructions
 
 - **Backend**: Run `pip install -r requirements.txt`.
 - **Frontend**: Execute `npm install` followed by `npm run build`.
