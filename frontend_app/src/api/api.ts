@@ -9,7 +9,7 @@ import {
 }from '../constants'
 
 const apiDevUrl =  'http://localhost:5000';
-const apiProdUrl =  'http://localhost:5000'; 
+const apiProdUrl = 'https://chatbot-project-1jej.onrender.com/'
 
 const baseUrl = process.env.NODE_ENV === 'production' ? apiProdUrl : apiDevUrl;
 
