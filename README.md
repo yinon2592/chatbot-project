@@ -43,3 +43,9 @@ The design focuses on user convenience and ease of use.
 
 - **Backend**: Run `pip install -r requirements.txt`.
 - **Frontend**: Execute `npm install` followed by `npm run build`.
+
+## Application URLs
+
+- **Backend URL**: [https://chatbot-project-1jej.onrender.com/](https://chatbot-project-1jej.onrender.com/)
+- **Frontend URL**: [https://chatbot-frontend-kklu.onrender.com/](https://chatbot-frontend-kklu.onrender.com/)
+
