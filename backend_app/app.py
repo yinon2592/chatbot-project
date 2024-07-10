@@ -17,8 +17,8 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Allow only the frontend running on localhost:3000 to access the backend
-CORS(app, origins="http://localhost:5173")
+# Allow only local requests to access the backend
+CORS(app, origins=["http://localhost:*", "http://127.0.0.1:*"])
 
 # Initialize OpenAI client
 clientOpenAi = OpenAI(
