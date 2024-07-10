@@ -101,4 +101,9 @@ def delete_order(order_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Get the environment variable
+    env = os.getenv('FLASK_ENV', 'production')
+    # Set debug mode based on the environment variable
+    print("FLASK_ENV = ", env)
+    debug = env == 'development'
+    app.run(debug=debug)
