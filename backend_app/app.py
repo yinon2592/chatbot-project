@@ -18,7 +18,7 @@ load_dotenv()
 app = Flask(__name__)
 
 # Allow only local requests to access the backend
-CORS(app, origins=["http://localhost:*", "http://127.0.0.1:*", "https://chatbot-frontend-kklu.onrender.com/"])
+CORS(app, origins=["http://localhost:*", "http://127.0.0.1:*", "https://chatbot-frontend-kklu.onrender.com"])
 
 # Initialize OpenAI client
 clientOpenAi = OpenAI(
