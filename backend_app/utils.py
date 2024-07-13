@@ -66,7 +66,7 @@ def handle_request_human_include_info_classification(classification):
     else:
         return "Error parsing contact information. Please try again.\n"
 
-def create_order_handle(orders_table, order_status):
+def handle_create_order(orders_table, order_status):
     unique_id = str(uuid.uuid4())
     orders_table.put_item(
             Item={

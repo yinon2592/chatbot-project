@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify, render_template
+from flask_socketio import SocketIO, emit
 from openai import OpenAI
 import os
 import boto3
 from dotenv import load_dotenv
 from flask_cors import CORS
-from utils import classify_message, handle_order_status_include_id_classification, handle_request_human_include_info_classification, create_order_handle, get_order_by_id, fetch_orders, update_order_status, delete_order_by_id
+from utils import classify_message, handle_order_status_include_id_classification, handle_request_human_include_info_classification, handle_create_order, get_order_by_id, fetch_orders, update_order_status, delete_order_by_id
 from constants import (INITIAL, ORDER_STATUS_WITHOUT_ID, ORDER_STATUS_INCLUDE_ID,
                        REQUEST_HUMAN_WITHOUT_ALL_CONTACT_INFO, REQUEST_HUMAN_INCLUDE_ALL_CONTACT_INFO,
                        RETURN_POLICY_Q1, RETURN_POLICY_Q2, RETURN_POLICY_Q3, UNKNOWN,
@@ -15,10 +16,18 @@ from constants import (INITIAL, ORDER_STATUS_WITHOUT_ID, ORDER_STATUS_INCLUDE_ID
 # Load environment variables from .env file
 load_dotenv()
 
-app = Flask(__name__)
+# Define allowed origins
+allowed_origins = [
+    "http://localhost:*", 
+    "http://127.0.0.1:*", 
+    "http://localhost:5173",  
+    "https://chatbot-frontend-kklu.onrender.com"
+]
 
-# Allow only local requests to access the backend
-CORS(app, origins=["http://localhost:*", "http://127.0.0.1:*", "https://chatbot-frontend-kklu.onrender.com"])
+# Initialize the Flask app and SocketIO with CORS configuration
+app = Flask(__name__)
+socketio = SocketIO(app, cors_allowed_origins=allowed_origins)
+CORS(app, origins=allowed_origins)
 
 # Initialize OpenAI client
 clientOpenAi = OpenAI(
@@ -34,9 +43,9 @@ orders_table = dynamodb.Table('Orders')
 def home():
     return render_template('index.html')
 
-@app.route('/chat', methods=['POST'])
-def chat():
-    user_message = request.json.get('message')
+@socketio.on('chat')
+def chat(data):
+    user_message = data['message']
     classifications = classify_message(clientOpenAi, user_message)
     response = ""
     
@@ -60,14 +69,14 @@ def chat():
         if classification == UNKNOWN and response == "":
             response += UNKNOWN_MSG
 
-    return jsonify({"response": response.strip()})
+    emit('bot_response', {'response': response.strip()})
 
 # CRUD operations for orders
 
 @app.route('/order', methods=['POST'])
 def create_order():
     order_status = request.json.get('status')
-    unique_id = create_order_handle(orders_table, order_status)
+    unique_id = handle_create_order(orders_table, order_status)
     return jsonify({'id': unique_id})
 
 @app.route('/order/<order_id>', methods=['GET'])
@@ -105,5 +114,6 @@ if __name__ == '__main__':
     env = os.getenv('FLASK_ENV', 'production')
     # Set debug mode based on the environment variable
     print("FLASK_ENV = ", env)
-    debug = env == 'development'
-    app.run(debug=debug)
+    # debug = env == 'development'
+    # app.run(debug=debug)
+    socketio.run(app)

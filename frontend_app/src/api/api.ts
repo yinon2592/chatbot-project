@@ -1,17 +1,18 @@
 import axios from 'axios';
-import { OrderData, ContactInfo } from '../types';
+import { OrderData } from '../types';
+import io from 'socket.io-client';
 import {
     ORDER_PATH,
     ORDERS_PATH,
     ORDER_ID_PATH,
-    CHAT_PATH,
-    REQUEST_HUMAN_PATH
 }from '../constants'
+
 
 const apiDevUrl =  'http://localhost:5000';
 const apiProdUrl = 'https://chatbot-project-1jej.onrender.com/'
 
 const baseUrl = process.env.NODE_ENV === 'production' ? apiProdUrl : apiDevUrl;
+const socket = io(baseUrl);
 
 const api = axios.create({
   baseURL: baseUrl, 
@@ -20,14 +21,19 @@ const api = axios.create({
 const LIMIT = 10;
 
 export const ChatApi = {
-    sendMessage: async (message: string): Promise<string> => {
-        const response = await api.post(CHAT_PATH, { message });
-        return response.data.response || 'No response';
-    },
+    sendMessage: (message: string): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            socket.emit('chat', { message });
 
-    requestHuman: async (contact_info: ContactInfo): Promise<void> => {
-        await api.post(REQUEST_HUMAN_PATH, contact_info);
-    }
+            socket.on('bot_response', data => {
+                resolve(data.response);
+            });
+
+            socket.on('connect_error', (err) => {
+                reject('Connection Failed: ' + err.message);
+            });
+        });
+    },
 };
 
 export const OrderApi = {

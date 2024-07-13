@@ -28,7 +28,7 @@ system_prompt = f"""
 You are a customer support assistant that classifies user intents into multiple categories. You can identify if a user is asking for the status of an order, requesting a human representative, or inquiring about return policies. Follow these rules:
 
 1. **Initial State:** 
-    - {INITIAL}: When the user just starts to talk or greet.
+    - {INITIAL}:  This classification is used when the user begins their query with a greeting.
 
 2. **Return Policies:** 
     - {RETURN_POLICY_Q1}: When a user asks about the return policy for items purchased at the store.
@@ -58,12 +58,21 @@ Recognize and classify the user's intent into one or more of the following categ
 '{REQUEST_HUMAN_INCLUDE_ALL_CONTACT_INFO}<full_name><email><phone_number>',
 '{UNKNOWN}'
 ].
-Ensure that if multiple categories are identified, they are listed in the order specified above.
+Ensure that if multiple categories are identified, they are listed in the order specified above, namely:
+INITIAL -> RETURN_POLICY_Q1 -> RETURN_POLICY_Q2 -> RETURN_POLICY_Q3 -> ORDER_STATUS_WITHOUT_ID -> ORDER_STATUS_INCLUDE_ID -> REQUEST_HUMAN_WITHOUT_ALL_CONTACT_INFO -> REQUEST_HUMAN_INCLUDE_ALL_CONTACT_INFO -> UNKNOWN 
+before you output the response.
+in case of multiple turns (user: ..., assistant: ...) list just the categories that haven't been addressed yet.
 """
 
 # Define examples for the classifier
 examples = [
     {"role": "user", "content": "Hello"},
+    {"role": "assistant", "content": INITIAL},
+
+    {"role": "user", "content": "Hi"},
+    {"role": "assistant", "content": INITIAL},
+
+    {"role": "user", "content": "Hey"},
     {"role": "assistant", "content": INITIAL},
     
     {"role": "user", "content": "What is the status of my order?"},
@@ -113,5 +122,75 @@ examples = [
     {"role": "assistant", "content": f"{RETURN_POLICY_Q1} {ORDER_STATUS_INCLUDE_ID}_67890 {REQUEST_HUMAN_INCLUDE_ALL_CONTACT_INFO}_Bob-Brown_bob.brown@example.com_111-222-3333"},
 
     {"role": "user", "content": "Hey, can you check the status of my order ID 98765, connect me to a human representative, and inform me about the items that cannot be returned? My name is Alice Green, my email is alice.green@example.com, and my phone number is 444-555-6666."},
-    {"role": "assistant", "content": f"{INITIAL} {RETURN_POLICY_Q2} {ORDER_STATUS_INCLUDE_ID}_98765 {REQUEST_HUMAN_INCLUDE_ALL_CONTACT_INFO}_Alice-Green_alice.green@example.com_444-555-6666"}
+    {"role": "assistant", "content": f"{INITIAL} {RETURN_POLICY_Q2} {ORDER_STATUS_INCLUDE_ID}_98765 {REQUEST_HUMAN_INCLUDE_ALL_CONTACT_INFO}_Alice-Green_alice.green@example.com_444-555-6666"},
+
+    # examples with contexted conversation
+    {"role": "user", "content": f"""
+        user: Hello
+        assistant: {INITIAL_MSG}
+        current user message: what is the status of my order?
+    """},
+    {"role": "assistant", "content": ORDER_STATUS_WITHOUT_ID},
+
+    {"role": "user", "content": f"""
+        user: hi
+        assistant: {INITIAL_MSG}
+        current user message: my order id is 12345. Can you tell me the status?
+    """},
+    {"role": "assistant", "content": f"{ORDER_STATUS_INCLUDE_ID}_12345"},
+
+    {"role": "user", "content": f"""
+        user: Hey
+        assistant: {INITIAL_MSG}
+        current user message: I want to talk to a person.
+    """},
+    {"role": "assistant", "content": REQUEST_HUMAN_WITHOUT_ALL_CONTACT_INFO},
+
+    {"role": "user", "content": f"""
+        user: Hi
+        assistant: {INITIAL_MSG}
+        current user message: my name is John Doe, my email is john_doe@example.com and my phone number is 123-456-7890.
+    """},
+    {"role": "assistant", "content": f"{REQUEST_HUMAN_INCLUDE_ALL_CONTACT_INFO}_John-Doe_john_doe@example.com_123-456-7890"},
+
+    {"role": "user", "content": f"""
+        user: Helooo
+        assistant: {INITIAL_MSG}
+        current user message: what is the return policy for items purchased at your store? do you have any items that cannot be returned?
+    """},
+    {"role": "assistant", "content": f"{RETURN_POLICY_Q1} {RETURN_POLICY_Q2}"},
+
+    {"role": "user", "content": f"""
+        user: Hi there  
+        assistant: {INITIAL_MSG}
+        current user message: how will I receive my refund?
+    """},
+    {"role": "assistant", "content": RETURN_POLICY_Q3},
+
+    {"role": "user", "content": f"""
+        user: hi
+        assistant: {INITIAL_MSG}
+        current user message: what is the time now?
+    """},
+    {"role": "assistant", "content": UNKNOWN},
+
+    # UNKOWN
+    {"role": "user", "content": f"""
+        current user message: what is the time now?
+    """},
+    {"role": "assistant", "content": UNKNOWN},
+
+    {"role": "user", "content": f"""
+        user: Hello
+        assistant: {INITIAL_MSG}
+        current user message: i want to delete my order
+    """},
+    {"role": "assistant", "content": UNKNOWN},
+
+    {"role": "user", "content": f"""
+        user: hi
+        assistant: {INITIAL_MSG}
+        current user message: can you help me with something else?
+    """},
+    {"role": "assistant", "content": UNKNOWN},
 ]

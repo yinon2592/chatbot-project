@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TextField, Button, Box, Typography, Paper } from "@mui/material";
 import { ChatApi } from "../../api/api";
 import { useMutation } from '@tanstack/react-query';
 import './chat.css';
 
 export const Chat: React.FC = () => {
-    const [messages, setMessages] = useState<{ sender: 'you' | 'bot', text: string }[]>([]);
+    const [messages, setMessages] = useState<{ sender: 'user' | 'assistant', text: string }[]>([]);
     const [inputValue, setInputValue] = useState("");  // State to hold the input value
 
     const {
@@ -18,7 +18,7 @@ export const Chat: React.FC = () => {
         mutationFn: ChatApi.sendMessage,
         onSuccess: (data, _variables, _context) => {
             // console.log('Received data:', data);  // Debug log
-            setMessages(prev => [...prev, { sender: 'bot', text: data }]);
+            setMessages(prev => [...prev, { sender: 'assistant', text: data }]);
             setInputValue("");  // Clear the input field after sending the message
         },
         onError: (error) => {
@@ -26,12 +26,32 @@ export const Chat: React.FC = () => {
         },
       });
 
+    const formatLastKMessages = (messages : { sender: 'user' | 'assistant', text: string }[], contextLength: Number) => {
+        const lastMessages = messages.slice(-contextLength, -1);
+        let formattedMessages = lastMessages.map(msg => `${msg.sender}: ${msg.text}`).join('\n');
+        formattedMessages += `\ncurrent user message: ${messages[messages.length - 1].text}`;
+        return formattedMessages;
+    };
+
     const sendMessage = async () => {
         if (inputValue.trim()) {  // Check if the input value is not just empty spaces
-            setMessages(prev => [...prev, { sender: 'you', text: inputValue }]);
-            sendQuery(inputValue);
+            setMessages(prev => [...prev, { sender: 'user', text: inputValue }]);
         }
     };
+
+    useEffect(() => {
+        if (messages.length === 0 || messages[messages.length - 1].sender !== 'user') {
+            return; // Don't run on initial render or if the last message isn't from the user
+        }
+    
+        // Assuming formattedLastKMessages takes the whole messages array and formats the last 10 messages
+        const formattedContext = formatLastKMessages(messages, 21);
+        console.log("formattedContext:\n" + formattedContext);
+    
+        // Send both the latest message and the context
+        sendQuery(formattedContext);
+    
+    }, [messages]);
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -54,7 +74,7 @@ export const Chat: React.FC = () => {
             <Typography variant="h4" gutterBottom>Chatbot</Typography>
             <Paper style={{ maxHeight: 480, overflow: 'auto', padding: '20px', marginBottom: '20px', maxWidth: 800, backgroundColor: '#e7f7e7'}}>
                 {messages.map((msg, index) => (
-                    <Typography key={index} className={msg.sender === 'you' ? 'userMessage' : 'botMessage'}>
+                    <Typography key={index} className={msg.sender === 'user' ? 'userMessage' : 'assistantMessage'}>
                         {msg.text}
                     </Typography>
                 ))}
