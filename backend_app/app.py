@@ -27,6 +27,7 @@ allowed_origins = [
 # Initialize the Flask app and SocketIO with CORS configuration
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins=allowed_origins)
+# socketio = SocketIO(app, cors_allowed_origins=allowed_origins)
 CORS(app, origins=allowed_origins)
 
 # Initialize OpenAI client
@@ -48,6 +49,7 @@ def chat(data):
     print('Received message: ', data['message'])
     print('Received room: ', data['room'])
     user_message = data['message']
+    room = data['room']
     classifications = classify_message(clientOpenAi, user_message)
     response = ""
     
@@ -71,7 +73,7 @@ def chat(data):
         if classification == UNKNOWN and response == "":
             response += UNKNOWN_MSG
 
-    emit('bot_response', {'response': response.strip()}, room=data['room'])
+    emit('bot_response', {'response': response.strip()}, room=room)
 
 # CRUD operations for orders
 
