@@ -12,38 +12,24 @@ const apiDevUrl =  'http://localhost:5000';
 const apiProdUrl = 'https://chatbot-project-1jej.onrender.com/'
 
 const baseUrl = process.env.NODE_ENV === 'production' ? apiProdUrl : apiDevUrl;
+
 export const socket = io(baseUrl, {
-    // increse tumeout and interval to avoid disconnects
-    timeout: 10000,
-    reconnection: true,
-    reconnectionAttempts: 5,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 5000,
-    randomizationFactor: 0.8,
-    autoConnect: true,
-    transports: ['websocket'],
-  });
-  
+    reconnection: true,       // Enable automatic reconnection
+    reconnectionAttempts: 5,  // Limit reconnection attempts
+    reconnectionDelayMax: 5000, // Set maximum reconnection delay
+    transports: ['websocket'], // Use WebSocket only to avoid unnecessary transport checks
+});
 
 socket.on('connect', () => {
-    console.log('Connected to server');
-    console.log('Socket ID:', socket.id); 
+    console.log('Connected, Socket ID:', socket.id);
 });
 
-socket.on('disconnect', (reason) => {
+socket.on('disconnect', reason => {
     console.log('Disconnected:', reason);
-    if (reason === 'io server disconnect') {
-        // The server disconnected the client, attempt to reconnect.
-        socket.connect();
-    }
 });
 
-socket.on('reconnect_attempt', () => {
-    console.log('Attempting to reconnect...');
-});
-
-socket.on('reconnect', () => {
-    console.log('Reconnected with session ID:', socket.id);
+socket.on('reconnect', attemptNumber => {
+    console.log('Reconnected on attempt', attemptNumber, 'Socket ID:', socket.id);
 });
 
 const api = axios.create({
@@ -51,51 +37,6 @@ const api = axios.create({
 });
 
 const LIMIT = 10;
-
-// export const ChatApi = {
-//     sendMessage: (message: string): Promise<string> => {
-//         console.log('Sending message: ', message);
-//         return new Promise((resolve, reject) => {
-//             socket.emit('chat', { message: message, room: socket.id});
-
-//             socket.on('bot_response', data => {
-//                 console.log('Received response:', data.response);
-//                 resolve(data.response);
-//             });
-
-//             socket.on('connect_error', (err) => {
-//                 console.log('Connection Failed:', err.message);
-//                 reject('Connection Failed: ' + err.message);
-//             });
-//         });
-//     },
-// };
-
-// export const ChatApi = {
-//     sendMessage: (message: string): Promise<string> => {
-//         console.log('Sending message: ', message);
-//         return new Promise((resolve, reject) => {
-//             const handleResponse = (data: { response: string | PromiseLike<string>; }) => {
-//                 console.log('Received response:', data.response);
-//                 socket.off('bot_response', handleResponse);
-//                 socket.off('connect_error', handleError);
-//                 resolve(data.response);
-//             };
-
-//             const handleError = (err: { message: string; }) => {
-//                 console.log('Connection Failed:', err.message);
-//                 socket.off('bot_response', handleResponse);
-//                 socket.off('connect_error', handleError);
-//                 reject('Connection Failed: ' + err.message);
-//             };
-
-//             socket.emit('chat', { message: message, room: socket.id});
-//             socket.on('bot_response', handleResponse);
-//             socket.on('connect_error', handleError);
-//         });
-//     },
-// };
-
 
 export const OrderApi = {
 
