@@ -25,22 +25,50 @@ const api = axios.create({
 
 const LIMIT = 10;
 
+// export const ChatApi = {
+//     sendMessage: (message: string): Promise<string> => {
+//         console.log('Sending message: ', message);
+//         return new Promise((resolve, reject) => {
+//             socket.emit('chat', { message: message, room: socket.id});
+
+//             socket.on('bot_response', data => {
+//                 console.log('Received response:', data.response);
+//                 resolve(data.response);
+//             });
+
+//             socket.on('connect_error', (err) => {
+//                 console.log('Connection Failed:', err.message);
+//                 reject('Connection Failed: ' + err.message);
+//             });
+//         });
+//     },
+// };
+
 export const ChatApi = {
     sendMessage: (message: string): Promise<string> => {
+        console.log('Sending message: ', message);
         return new Promise((resolve, reject) => {
-            socket.emit('chat', { message: message, room: socket.id});
-
-            socket.on('bot_response', data => {
+            const handleResponse = (data: { response: string | PromiseLike<string>; }) => {
+                console.log('Received response:', data.response);
+                socket.off('bot_response', handleResponse);
+                socket.off('connect_error', handleError);
                 resolve(data.response);
-            });
+            };
 
-            socket.on('connect_error', (err) => {
+            const handleError = (err: { message: string; }) => {
                 console.log('Connection Failed:', err.message);
+                socket.off('bot_response', handleResponse);
+                socket.off('connect_error', handleError);
                 reject('Connection Failed: ' + err.message);
-            });
+            };
+
+            socket.emit('chat', { message: message, room: socket.id});
+            socket.on('bot_response', handleResponse);
+            socket.on('connect_error', handleError);
         });
     },
 };
+
 
 export const OrderApi = {
 

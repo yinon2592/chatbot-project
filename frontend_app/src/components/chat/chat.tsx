@@ -59,7 +59,7 @@ export const Chat: React.FC = () => {
     };
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter' && !event.shiftKey) {
+        if (event.key === 'Enter' && !event.shiftKey && !isQueryPending) {
             event.preventDefault();
             sendMessage();
         }
