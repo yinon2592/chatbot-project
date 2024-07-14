@@ -14,9 +14,9 @@ const apiProdUrl = 'https://chatbot-project-1jej.onrender.com/'
 const baseUrl = process.env.NODE_ENV === 'production' ? apiProdUrl : apiDevUrl;
 export const socket = io(baseUrl, {
     // increse tumeout and interval to avoid disconnects
-    timeout: 60000,
+    timeout: 10000,
     reconnection: true,
-    reconnectionAttempts: 10,
+    reconnectionAttempts: 5,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
     randomizationFactor: 0.8,

@@ -28,7 +28,7 @@ allowed_origins = [
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 # socketio = SocketIO(app, cors_allowed_origins=allowed_origins)
-socketio = SocketIO(app, cors_allowed_origins=allowed_origins, ping_timeout=60, ping_interval=25)
+socketio = SocketIO(app, cors_allowed_origins=allowed_origins, ping_timeout=10, ping_interval=5)
 CORS(app, origins=allowed_origins)
 
 # Initialize OpenAI client
