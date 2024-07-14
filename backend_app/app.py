@@ -47,6 +47,7 @@ def home():
 
 @socketio.on('chat')
 def chat(data):
+    print('Received data from client: ', data)
     print('Received message: ', data['message'])
     print('Received room: ', data['room'])
     user_message = data['message']
