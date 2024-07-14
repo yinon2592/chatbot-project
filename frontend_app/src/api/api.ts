@@ -21,6 +21,7 @@ export const socket = io(baseUrl, {
     reconnectionDelayMax: 5000,
     randomizationFactor: 0.8,
     autoConnect: true,
+    transports: ['websocket'],
   });
   
 
