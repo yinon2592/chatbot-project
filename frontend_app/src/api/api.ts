@@ -14,6 +14,11 @@ const apiProdUrl = 'https://chatbot-project-1jej.onrender.com/'
 const baseUrl = process.env.NODE_ENV === 'production' ? apiProdUrl : apiDevUrl;
 const socket = io(baseUrl);
 
+socket.on('connect', () => {
+    console.log('Connected to server');
+    console.log('Socket ID:', socket.id); 
+});
+
 const api = axios.create({
   baseURL: baseUrl, 
 });
@@ -23,7 +28,7 @@ const LIMIT = 10;
 export const ChatApi = {
     sendMessage: (message: string): Promise<string> => {
         return new Promise((resolve, reject) => {
-            socket.emit('chat', { message });
+            socket.emit('chat', { message: message, room: socket.id});
 
             socket.on('bot_response', data => {
                 resolve(data.response);

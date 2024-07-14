@@ -45,6 +45,8 @@ def home():
 
 @socketio.on('chat')
 def chat(data):
+    print('Received message: ', data['message'])
+    print('Received room: ', data['room'])
     user_message = data['message']
     classifications = classify_message(clientOpenAi, user_message)
     response = ""
@@ -69,7 +71,7 @@ def chat(data):
         if classification == UNKNOWN and response == "":
             response += UNKNOWN_MSG
 
-    emit('bot_response', {'response': response.strip()})
+    emit('bot_response', {'response': response.strip()}, room=data['room'])
 
 # CRUD operations for orders
 
