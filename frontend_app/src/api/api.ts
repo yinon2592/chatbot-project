@@ -35,6 +35,7 @@ export const ChatApi = {
             });
 
             socket.on('connect_error', (err) => {
+                console.log('Connection Failed:', err.message);
                 reject('Connection Failed: ' + err.message);
             });
         });
