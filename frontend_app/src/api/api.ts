@@ -12,7 +12,7 @@ const apiDevUrl =  'http://localhost:5000';
 const apiProdUrl = 'https://chatbot-project-1jej.onrender.com/'
 
 const baseUrl = process.env.NODE_ENV === 'production' ? apiProdUrl : apiDevUrl;
-const socket = io(baseUrl, {
+export const socket = io(baseUrl, {
     // increse tumeout and interval to avoid disconnects
     timeout: 60000,
     reconnection: true,
@@ -70,30 +70,30 @@ const LIMIT = 10;
 //     },
 // };
 
-export const ChatApi = {
-    sendMessage: (message: string): Promise<string> => {
-        console.log('Sending message: ', message);
-        return new Promise((resolve, reject) => {
-            const handleResponse = (data: { response: string | PromiseLike<string>; }) => {
-                console.log('Received response:', data.response);
-                socket.off('bot_response', handleResponse);
-                socket.off('connect_error', handleError);
-                resolve(data.response);
-            };
+// export const ChatApi = {
+//     sendMessage: (message: string): Promise<string> => {
+//         console.log('Sending message: ', message);
+//         return new Promise((resolve, reject) => {
+//             const handleResponse = (data: { response: string | PromiseLike<string>; }) => {
+//                 console.log('Received response:', data.response);
+//                 socket.off('bot_response', handleResponse);
+//                 socket.off('connect_error', handleError);
+//                 resolve(data.response);
+//             };
 
-            const handleError = (err: { message: string; }) => {
-                console.log('Connection Failed:', err.message);
-                socket.off('bot_response', handleResponse);
-                socket.off('connect_error', handleError);
-                reject('Connection Failed: ' + err.message);
-            };
+//             const handleError = (err: { message: string; }) => {
+//                 console.log('Connection Failed:', err.message);
+//                 socket.off('bot_response', handleResponse);
+//                 socket.off('connect_error', handleError);
+//                 reject('Connection Failed: ' + err.message);
+//             };
 
-            socket.emit('chat', { message: message, room: socket.id});
-            socket.on('bot_response', handleResponse);
-            socket.on('connect_error', handleError);
-        });
-    },
-};
+//             socket.emit('chat', { message: message, room: socket.id});
+//             socket.on('bot_response', handleResponse);
+//             socket.on('connect_error', handleError);
+//         });
+//     },
+// };
 
 
 export const OrderApi = {

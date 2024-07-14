@@ -1,30 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { TextField, Button, Box, Typography, Paper } from "@mui/material";
-import { ChatApi } from "../../api/api";
-import { useMutation } from '@tanstack/react-query';
+// import { ChatApi } from "../../api/api";
+// import { useMutation } from '@tanstack/react-query';
 import './chat.css';
+import { socket } from "../../api/api";
 
 export const Chat: React.FC = () => {
     const [messages, setMessages] = useState<{ sender: 'user' | 'assistant', text: string }[]>([]);
     const [inputValue, setInputValue] = useState("");  // State to hold the input value
+    const [isQueryPending, setIsQueryPending] = useState(false);  // State to hold the query status
 
-    const {
-        isSuccess: _isQuerySuccess,
-        isError: _isQueryerror,
-        isPending: isQueryPending,
-        mutate: sendQuery,
-      } = useMutation({
-        retry: false,
-        mutationFn: ChatApi.sendMessage,
-        onSuccess: (data, _variables, _context) => {
-            // console.log('Received data:', data);  // Debug log
-            setMessages(prev => [...prev, { sender: 'assistant', text: data }]);
-            setInputValue("");  // Clear the input field after sending the message
-        },
-        onError: (error) => {
-            console.log(error);
-        },
-      });
+    // const {
+    //     isSuccess: _isQuerySuccess,
+    //     isError: _isQueryerror,
+    //     isPending: isQueryPending,
+    //     mutate: sendQuery,
+    //   } = useMutation({
+    //     retry: false,
+    //     mutationFn: ChatApi.sendMessage,
+    //     onSuccess: (data, _variables, _context) => {
+    //         // console.log('Received data:', data);  // Debug log
+    //         setMessages(prev => [...prev, { sender: 'assistant', text: data }]);
+    //         setInputValue("");  // Clear the input field after sending the message
+    //     },
+    //     onError: (error) => {
+    //         console.log(error);
+    //     },
+    //   });
 
     const formatLastKMessages = (messages : { sender: 'user' | 'assistant', text: string }[], contextLength: Number) => {
         const lastMessages = messages.slice(-contextLength, -1);
@@ -43,13 +45,23 @@ export const Chat: React.FC = () => {
         if (messages.length === 0 || messages[messages.length - 1].sender !== 'user') {
             return; // Don't run on initial render or if the last message isn't from the user
         }
-    
+        setIsQueryPending(true);
         // Assuming formattedLastKMessages takes the whole messages array and formats the last 10 messages
         const formattedContext = formatLastKMessages(messages, 21);
         console.log("formattedContext:\n" + formattedContext);
     
         // Send both the latest message and the context
-        sendQuery(formattedContext);
+        // sendQuery(formattedContext);
+        socket.emit('chat', { message: formattedContext, room: socket.id});
+        socket.on('bot_response', data => {
+            setMessages(prev => [...prev, { sender: 'assistant', text: data.response }]);
+            setInputValue("");  // Clear the input field after sending the message
+        });
+        setIsQueryPending(false);
+
+        return () => {
+            socket.off('bot_response');
+        };
     
     }, [messages]);
 
