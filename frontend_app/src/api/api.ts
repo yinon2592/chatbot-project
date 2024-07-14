@@ -19,6 +19,22 @@ socket.on('connect', () => {
     console.log('Socket ID:', socket.id); 
 });
 
+socket.on('disconnect', (reason) => {
+    console.log('Disconnected:', reason);
+    if (reason === 'io server disconnect') {
+        // The server disconnected the client, attempt to reconnect.
+        socket.connect();
+    }
+});
+
+socket.on('reconnect_attempt', () => {
+    console.log('Attempting to reconnect...');
+});
+
+socket.on('reconnect', () => {
+    console.log('Reconnected with session ID:', socket.id);
+});
+
 const api = axios.create({
   baseURL: baseUrl, 
 });
